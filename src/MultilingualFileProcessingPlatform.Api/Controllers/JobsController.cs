@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MultilingualFileProcessingPlatform.Api.Models;
+using MultilingualFileProcessingPlatform.Api.Services;
 
 namespace MultilingualFileProcessingPlatform.Api.Controllers;
 
@@ -6,9 +8,18 @@ namespace MultilingualFileProcessingPlatform.Api.Controllers;
 [ApiController]
 public class JobsController : ControllerBase
 {
+    private readonly JobService _jobService;
+
+    public JobsController(JobService jobService)
+    {
+        _jobService = jobService;
+    }
+
     [HttpGet]
     public IActionResult GetJobs()
     {
-        return Ok("Jobs endpoint is working");
+        List<Job> jobs = _jobService.GetJobs();
+
+        return Ok(jobs);
     }
 }

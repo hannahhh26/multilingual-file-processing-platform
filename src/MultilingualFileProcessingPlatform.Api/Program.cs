@@ -1,7 +1,10 @@
+using MultilingualFileProcessingPlatform.Api.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddSingleton<JobService>();
 
 var app = builder.Build();
 
