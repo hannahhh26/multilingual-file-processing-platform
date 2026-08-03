@@ -6,7 +6,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<JobService>();
+builder.Services.AddSingleton<IJobService, JobService>();
 
 var app = builder.Build();
 

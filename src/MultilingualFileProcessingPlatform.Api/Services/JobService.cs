@@ -5,7 +5,7 @@ namespace MultilingualFileProcessingPlatform.Api.Services
     /// <summary>
     /// Provides operations for managing jobs.
     /// </summary>
-    public class JobService
+    public class JobService : IJobService
     {
        private readonly List<Job> _jobs = [];
 

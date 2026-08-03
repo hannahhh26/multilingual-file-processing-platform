@@ -8,9 +8,9 @@ namespace MultilingualFileProcessingPlatform.Api.Controllers;
 [ApiController]
 public class JobsController : ControllerBase
 {
-    private readonly JobService _jobService;
+    private readonly IJobService _jobService;
 
-    public JobsController(JobService jobService)
+    public JobsController(IJobService jobService)
     {
         _jobService = jobService;
     }
