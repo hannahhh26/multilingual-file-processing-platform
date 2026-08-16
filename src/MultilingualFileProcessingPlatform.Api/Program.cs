@@ -11,6 +11,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddScoped<JsonProcessingService>();
 
 var app = builder.Build();
 

@@ -10,10 +10,14 @@ namespace MultilingualFileProcessingPlatform.Api.Services
     public class JobService : IJobService
     {
         private readonly AppDbContext _context;
+        private readonly JsonProcessingService _jsonProcessingService;
 
-        public JobService(AppDbContext context)
+        public JobService(
+            AppDbContext context,
+            JsonProcessingService jsonProcessingService)
         {
             _context = context;
+            _jsonProcessingService = jsonProcessingService;
         }
 
         /// <summary>
@@ -102,7 +106,7 @@ namespace MultilingualFileProcessingPlatform.Api.Services
                 return SaveSourceFileResult.InvalidJson;
             }
 
-            string uploadsDirectory = Path.Combine("Uploads", id.ToString());
+            string uploadsDirectory = Path.Combine("Uploads", id.ToString(), "Original");
 
             Directory.CreateDirectory(uploadsDirectory);
 
@@ -113,6 +117,64 @@ namespace MultilingualFileProcessingPlatform.Api.Services
             file.CopyTo(stream);
 
             return SaveSourceFileResult.Success;
+        }
+
+        public PreprocessJobResult PreprocessJob(Guid id)
+        {
+            Job? job = _context.Jobs.FirstOrDefault(job => job.Id == id);
+
+            if (job == null)
+            {
+                return PreprocessJobResult.JobNotFound;
+            }
+
+            string originalDirectory = Path.Combine(
+                "Uploads",
+                id.ToString(),
+                "Original");
+
+            if (!Directory.Exists(originalDirectory))
+            {
+                return PreprocessJobResult.SourceFileNotFound;
+            }
+
+            string? sourceFilePath = Directory
+                .GetFiles(originalDirectory, "*.json")
+                .FirstOrDefault();
+
+            if (sourceFilePath == null)
+            {
+                return PreprocessJobResult.SourceFileNotFound;
+            }
+
+            string sourceJson = File.ReadAllText(sourceFilePath);
+
+            Dictionary<string, string> strings =
+                _jsonProcessingService.ExtractStrings(sourceJson);
+
+            string preparedSourceDirectory = Path.Combine(
+                "Uploads",
+                id.ToString(),
+                "PreparedSource");
+
+            Directory.CreateDirectory(preparedSourceDirectory);
+
+            string fileName = Path.GetFileName(sourceFilePath);
+
+            string preparedSourcePath = Path.Combine(
+                preparedSourceDirectory,
+                fileName);
+
+            string preparedJson = JsonSerializer.Serialize(
+                strings,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+
+            File.WriteAllText(preparedSourcePath, preparedJson);
+
+            return PreprocessJobResult.Success;
         }
     }
 }

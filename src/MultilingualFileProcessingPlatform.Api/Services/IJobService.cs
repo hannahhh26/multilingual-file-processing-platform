@@ -15,5 +15,7 @@ namespace MultilingualFileProcessingPlatform.Api.Services
         bool DeleteJob(Guid id);
 
         SaveSourceFileResult SaveSourceFile(Guid id, IFormFile file);
+
+        PreprocessJobResult PreprocessJob(Guid id);
     }
 }

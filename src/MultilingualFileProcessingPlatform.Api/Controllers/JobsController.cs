@@ -100,4 +100,22 @@ public class JobsController : ControllerBase
 
         return Ok();
     }
+
+    [HttpPost("{id}/preprocess")]
+    public IActionResult PreprocessJob(Guid id)
+    {
+        PreprocessJobResult result = _jobService.PreprocessJob(id);
+
+        if (result == PreprocessJobResult.JobNotFound)
+        {
+            return NotFound();
+        }
+
+        if (result == PreprocessJobResult.SourceFileNotFound)
+        {
+            return BadRequest("Source file has not been uploaded.");
+        }
+
+        return Ok();
+    }
 }
