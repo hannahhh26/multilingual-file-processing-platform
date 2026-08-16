@@ -1,4 +1,5 @@
 ﻿using MultilingualFileProcessingPlatform.Api.Models;
+using MultilingualFileProcessingPlatform.Api.Data;
 
 namespace MultilingualFileProcessingPlatform.Api.Services
 {
@@ -7,19 +8,24 @@ namespace MultilingualFileProcessingPlatform.Api.Services
     /// </summary>
     public class JobService : IJobService
     {
-       private readonly List<Job> _jobs = [];
+        private readonly AppDbContext _context;
+
+        public JobService(AppDbContext context)
+        {
+            _context = context;
+        }
 
         /// <summary>
         /// Returns all jobs.
         /// </summary>
         public List<Job> GetJobs()
         {
-            return _jobs;
+            return _context.Jobs.ToList();
         }
 
         public Job? GetJob(Guid id)
         {
-            return _jobs.FirstOrDefault(job => job.Id == id);
+            return _context.Jobs.FirstOrDefault(job => job.Id == id);
         }
 
         public Job CreateJob(string name)
@@ -32,28 +38,30 @@ namespace MultilingualFileProcessingPlatform.Api.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            _jobs.Add(job);
+            _context.Jobs.Add(job);
+            _context.SaveChanges();
 
             return job;
         }
 
         public bool DeleteJob(Guid id)
         {
-            Job? job = _jobs.FirstOrDefault(job => job.Id == id);
+            Job? job = _context.Jobs.FirstOrDefault(job => job.Id == id);
 
             if (job == null)
             {
                 return false;
             }
 
-            _jobs.Remove(job);
+            _context.Jobs.Remove(job);
+            _context.SaveChanges();
 
             return true;
         }
 
         public Job? UpdateJob(Guid id, string name)
         {
-            Job? job = _jobs.FirstOrDefault(job => job.Id == id);
+            Job? job = _context.Jobs.FirstOrDefault(job => job.Id == id);
 
             if (job == null)
             {
@@ -61,6 +69,8 @@ namespace MultilingualFileProcessingPlatform.Api.Services
             }
 
             job.Name = name;
+
+            _context.SaveChanges();
 
             return job;
         }

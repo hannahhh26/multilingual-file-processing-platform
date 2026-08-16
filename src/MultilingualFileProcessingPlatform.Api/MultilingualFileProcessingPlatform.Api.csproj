@@ -4,6 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>ca91ef85-4e39-4815-b288-02bff64a1eae</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,7 +16,11 @@
 
     <ItemGroup>
 	    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3" />
-	    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
+	    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
+	    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6">
+	      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	      <PrivateAssets>all</PrivateAssets>
+	    </PackageReference>
 	    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
 	    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     </ItemGroup>
