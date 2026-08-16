@@ -72,4 +72,32 @@ public class JobsController : ControllerBase
 
         return Ok(job);
     }
+
+    [HttpPost("{id}/source")]
+    public IActionResult UploadSourceFile(Guid id, IFormFile file)
+    {
+        if (file.Length == 0)
+        {
+            return BadRequest("File is empty.");
+        }
+
+        SaveSourceFileResult result = _jobService.SaveSourceFile(id, file);
+
+        if (result == SaveSourceFileResult.JobNotFound)
+        {
+            return NotFound();
+        }
+
+        if (result == SaveSourceFileResult.InvalidFileType)
+        {
+            return BadRequest("Only JSON files are supported.");
+        }
+
+        if (result == SaveSourceFileResult.InvalidJson)
+        {
+            return BadRequest("File does not contain valid JSON.");
+        }
+
+        return Ok();
+    }
 }

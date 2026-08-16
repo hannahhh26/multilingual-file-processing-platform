@@ -438,3 +438,6 @@ venv/
 
 # macOS
 .DS_Store
+
+# Runtime uploaded files
+Uploads/

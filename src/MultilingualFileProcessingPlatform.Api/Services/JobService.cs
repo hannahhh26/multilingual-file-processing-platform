@@ -1,4 +1,5 @@
-﻿using MultilingualFileProcessingPlatform.Api.Models;
+﻿using System.Text.Json;
+using MultilingualFileProcessingPlatform.Api.Models;
 using MultilingualFileProcessingPlatform.Api.Data;
 
 namespace MultilingualFileProcessingPlatform.Api.Services
@@ -73,6 +74,45 @@ namespace MultilingualFileProcessingPlatform.Api.Services
             _context.SaveChanges();
 
             return job;
+        }
+
+        public SaveSourceFileResult SaveSourceFile(Guid id, IFormFile file)
+        {
+            Job? job = _context.Jobs.FirstOrDefault(job => job.Id == id);
+
+            if (job == null)
+            {
+                return SaveSourceFileResult.JobNotFound;
+            }
+
+            string extension = Path.GetExtension(file.FileName);
+
+            if (!extension.Equals(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                return SaveSourceFileResult.InvalidFileType;
+            }
+
+            try
+            {
+                using Stream jsonStream = file.OpenReadStream();
+                using JsonDocument document = JsonDocument.Parse(jsonStream);
+            }
+            catch (JsonException)
+            {
+                return SaveSourceFileResult.InvalidJson;
+            }
+
+            string uploadsDirectory = Path.Combine("Uploads", id.ToString());
+
+            Directory.CreateDirectory(uploadsDirectory);
+
+            string filePath = Path.Combine(uploadsDirectory, file.FileName);
+
+            using FileStream stream = new FileStream(filePath, FileMode.Create);
+
+            file.CopyTo(stream);
+
+            return SaveSourceFileResult.Success;
         }
     }
 }
