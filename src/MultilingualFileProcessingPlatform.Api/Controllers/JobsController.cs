@@ -15,6 +15,9 @@ public class JobsController : ControllerBase
         _jobService = jobService;
     }
 
+    /// <summary>
+    /// Returns all jobs.
+    /// </summary>
     [HttpGet]
     public IActionResult GetJobs()
     {
@@ -23,6 +26,9 @@ public class JobsController : ControllerBase
         return Ok(jobs);
     }
 
+    /// <summary>
+    /// Returns a specific job by its ID.
+    /// </summary>
     [HttpGet("{id}")]
     public IActionResult GetJob(Guid id)
     {
@@ -36,6 +42,9 @@ public class JobsController : ControllerBase
         return Ok(job);
     }
 
+    /// <summary>
+    /// Creates a new processing job.
+    /// </summary>
     [HttpPost]
     public IActionResult CreateJob(CreateJobRequest request)
     {
@@ -47,6 +56,9 @@ public class JobsController : ControllerBase
             job);
     }
 
+    /// <summary>
+    /// Deletes a job.
+    /// </summary>
     [HttpDelete("{id}")]
     public IActionResult DeleteJob(Guid id)
     {
@@ -60,6 +72,9 @@ public class JobsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Updates an existing job with new details.
+    /// </summary>
     [HttpPut("{id}")]
     public IActionResult UpdateJob(Guid id, UpdateJobRequest request)
     {
@@ -73,6 +88,9 @@ public class JobsController : ControllerBase
         return Ok(job);
     }
 
+    /// <summary>
+    /// Uploads and validates the original source JSON file for a job.
+    /// </summary>
     [HttpPost("{id}/source")]
     public IActionResult UploadSourceFile(Guid id, IFormFile file)
     {
@@ -101,6 +119,9 @@ public class JobsController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Extracts translatable strings from the uploaded source JSON and a simplified source file.
+    /// </summary>
     [HttpPost("{id}/preprocess")]
     public IActionResult PreprocessJob(Guid id)
     {
