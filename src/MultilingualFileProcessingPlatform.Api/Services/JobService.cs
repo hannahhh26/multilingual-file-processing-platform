@@ -176,5 +176,50 @@ namespace MultilingualFileProcessingPlatform.Api.Services
 
             return PreprocessJobResult.Success;
         }
+
+        public GetPreparedSourceResult GetPreparedSource(Guid id)
+        {
+            var job = _context.Jobs.Find(id);
+
+            if (job == null)
+            {
+                return new GetPreparedSourceResult
+                {
+                    Result = GetPreparedSourceResultType.JobNotFound
+                };
+            }
+
+            var preparedSourceDirectory = Path.Combine(
+                "Uploads",
+                id.ToString(),
+                "PreparedSource"
+            );
+
+            if (!Directory.Exists(preparedSourceDirectory))
+            {
+                return new GetPreparedSourceResult
+                {
+                    Result = GetPreparedSourceResultType.PreparedSourceNotFound
+                };
+            }
+
+            var preparedSourceFile = Directory
+                .GetFiles(preparedSourceDirectory, "*.json")
+                .FirstOrDefault();
+
+            if (preparedSourceFile == null)
+            {
+                return new GetPreparedSourceResult
+                {
+                    Result = GetPreparedSourceResultType.PreparedSourceNotFound
+                };
+            }
+
+            return new GetPreparedSourceResult
+            {
+                Result = GetPreparedSourceResultType.Success,
+                FilePath = preparedSourceFile
+            };
+        }
     }
 }

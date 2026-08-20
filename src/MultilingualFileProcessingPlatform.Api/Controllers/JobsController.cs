@@ -139,4 +139,35 @@ public class JobsController : ControllerBase
 
         return Ok();
     }
+
+    /// <summary>
+    /// Downloads the prepared source JSON for a job.
+    /// </summary>
+    [HttpGet("{id}/prepared-source")]
+    public IActionResult GetPreparedSourc(Guid id)
+    {
+        var result = _jobService.GetPreparedSource(id);
+
+        switch (result.Result)
+        {
+            case GetPreparedSourceResultType.JobNotFound:
+                return NotFound("Job not found.");
+
+            case GetPreparedSourceResultType.PreparedSourceNotFound:
+                return NotFound("Prepared source file not found.");
+
+            case GetPreparedSourceResultType.Success:
+                var fileBytes = System.IO.File.ReadAllBytes(result.FilePath!);
+                var fileName = Path.GetFileName(result.FilePath!);
+
+                return File(
+                    fileBytes,
+                    "application/json",
+                    fileName
+                );
+
+            default:
+                return StatusCode(500);
+        }
+    }
 }
