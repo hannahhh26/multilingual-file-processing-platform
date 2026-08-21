@@ -221,5 +221,61 @@ namespace MultilingualFileProcessingPlatform.Api.Services
                 FilePath = preparedSourceFile
             };
         }
+
+        public SaveTranslationFileResult SaveTranslationFile(Guid id, IFormFile file)
+        {
+            var job = _context.Jobs.Find(id);
+
+            if (job == null)
+            {
+                return new SaveTranslationFileResult
+                {
+                    Result = SaveTranslationFileResultType.JobNotFound
+                };
+            }
+
+            if (Path.GetExtension(file.FileName).ToLower() != ".json")
+            {
+                return new SaveTranslationFileResult
+                {
+                    Result = SaveTranslationFileResultType.InvalidFileType
+                };
+            }
+
+            try
+            {
+                using var reader = new StreamReader(file.OpenReadStream());
+                var json = reader.ReadToEnd();
+
+                JsonDocument.Parse(json);
+
+                var translationDirectory = Path.Combine(
+                    "Uploads",
+                    id.ToString(),
+                    "Translation"
+                );
+
+                Directory.CreateDirectory(translationDirectory);
+
+                var filePath = Path.Combine(
+                    translationDirectory,
+                    Path.GetFileName(file.FileName)
+                );
+
+                System.IO.File.WriteAllText(filePath, json);
+
+                return new SaveTranslationFileResult
+                {
+                    Result = SaveTranslationFileResultType.Success
+                };
+            }
+            catch (JsonException)
+            {
+                return new SaveTranslationFileResult
+                {
+                    Result = SaveTranslationFileResultType.InvalidJson
+                };
+            }
+        }
     }
 }

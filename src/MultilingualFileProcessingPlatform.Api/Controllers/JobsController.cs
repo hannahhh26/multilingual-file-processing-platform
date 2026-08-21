@@ -170,4 +170,31 @@ public class JobsController : ControllerBase
                 return StatusCode(500);
         }
     }
+
+    /// <summary>
+    /// Uploads the translated JSON file for a job.
+    /// </summary>
+    [HttpPost("{id}/translation")]
+    public IActionResult UploadTranslation(Guid id, IFormFile file)
+    {
+        var result = _jobService.SaveTranslationFile(id, file);
+
+        switch (result.Result)
+        {
+            case SaveTranslationFileResultType.JobNotFound:
+                return NotFound("Job not found.");
+
+            case SaveTranslationFileResultType.InvalidFileType:
+                return BadRequest("Only JSON files are supported.");
+
+            case SaveTranslationFileResultType.InvalidJson:
+                return BadRequest("File does not contain valid JSON.");
+
+            case SaveTranslationFileResultType.Success:
+                return Ok("Translation uploaded successfully.");
+
+            default:
+                return StatusCode(500);
+        }
+    }
 }
