@@ -149,8 +149,8 @@ namespace MultilingualFileProcessingPlatform.Api.Services
 
             string sourceJson = File.ReadAllText(sourceFilePath);
 
-            Dictionary<string, string> strings =
-                _jsonProcessingService.ExtractStrings(sourceJson);
+            JsonPreprocessingResult preprocessingResult =
+                _jsonProcessingService.PreprocessJson(sourceJson);
 
             string preparedSourceDirectory = Path.Combine(
                 "Uploads",
@@ -166,13 +166,35 @@ namespace MultilingualFileProcessingPlatform.Api.Services
                 fileName);
 
             string preparedJson = JsonSerializer.Serialize(
-                strings,
+                new
+                {
+                    Segments = preprocessingResult.Segments
+                },
                 new JsonSerializerOptions
                 {
                     WriteIndented = true
                 });
 
             File.WriteAllText(preparedSourcePath, preparedJson);
+
+            string reconstructionDataDirectory = Path.Combine(
+                "Uploads",
+                id.ToString(),
+                "ReconstructionData");
+
+            Directory.CreateDirectory(reconstructionDataDirectory);
+
+            string reconstructionDataPath = Path.Combine(
+                reconstructionDataDirectory,
+                fileName);
+
+            string reconstructionJson = preprocessingResult.ReconstructionData!
+                .ToJsonString(new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+
+            File.WriteAllText(reconstructionDataPath, reconstructionJson);
 
             return PreprocessJobResult.Success;
         }
