@@ -403,5 +403,46 @@ namespace MultilingualFileProcessingPlatform.Api.Services
                 Result = PostprocessJobResultType.Success
             };
         }
+
+        public GetDeliveryResult GetDelivery(Guid id)
+        {
+            Job? job = _context.Jobs.Find(id);
+
+            if (job == null)
+            {
+                return new GetDeliveryResult
+                {
+                    Result = GetDeliveryResultType.JobNotFound
+                };
+            }
+
+            string deliveryDirectory = Path.Combine("Uploads", id.ToString(), "Delivery");
+
+            if (!Directory.Exists(deliveryDirectory))
+            {
+                return new GetDeliveryResult
+                {
+                    Result = GetDeliveryResultType.DeliveryNotFound
+                };
+            }
+
+            string? deliveryFile = Directory
+                .GetFiles(deliveryDirectory, "*.json")
+                .FirstOrDefault();
+
+            if (deliveryFile == null)
+            {
+                return new GetDeliveryResult
+                {
+                    Result = GetDeliveryResultType.DeliveryNotFound
+                };
+            }
+
+            return new GetDeliveryResult
+            {
+                Result = GetDeliveryResultType.Success,
+                FilePath = deliveryFile
+            };
+        }
     }
 }

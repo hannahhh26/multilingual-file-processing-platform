@@ -231,4 +231,36 @@ public class JobsController : ControllerBase
                 return StatusCode(500);
         }
     }
+
+
+    /// <summary>
+    /// Downloads the delivery asset for a job.
+    /// </summary>
+    [HttpGet("{id}/delivery")]
+    public IActionResult GetDelivery(Guid id)
+    {
+        GetDeliveryResult result = _jobService.GetDelivery(id);
+
+        switch (result.Result)
+        {
+            case GetDeliveryResultType.JobNotFound:
+                return NotFound("Job not found.");
+
+            case GetDeliveryResultType.DeliveryNotFound:
+                return NotFound("Delivery file not found.");
+
+            case GetDeliveryResultType.Success:
+                byte[] fileBytes = System.IO.File.ReadAllBytes(result.FilePath!);
+                string fileName = Path.GetFileName(result.FilePath!);
+
+                return File(
+                    fileBytes,
+                    "application/json",
+                    fileName
+                );
+
+            default:
+                return StatusCode(500);
+        }
+    }
 }
