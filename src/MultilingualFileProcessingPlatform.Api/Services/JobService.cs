@@ -306,7 +306,10 @@ namespace MultilingualFileProcessingPlatform.Api.Services
 
             if (job == null)
             {
-                return PostprocessJobResult.JobNotFound;
+                return new PostprocessJobResult
+                {
+                    Result = PostprocessJobResultType.JobNotFound
+                };
             }
 
             string reconstructionDataDirectory = Path.Combine(
@@ -316,7 +319,10 @@ namespace MultilingualFileProcessingPlatform.Api.Services
 
             if (!Directory.Exists(reconstructionDataDirectory))
             {
-                return PostprocessJobResult.ReconstructionDataNotFound;
+                return new PostprocessJobResult
+                {
+                    Result = PostprocessJobResultType.ReconstructionDataNotFound
+                };
             }
 
             string? reconstructionDataPath = Directory
@@ -325,7 +331,10 @@ namespace MultilingualFileProcessingPlatform.Api.Services
 
             if (reconstructionDataPath == null)
             {
-                return PostprocessJobResult.ReconstructionDataNotFound;
+                return new PostprocessJobResult
+                {
+                    Result = PostprocessJobResultType.ReconstructionDataNotFound
+                };
             }
 
             string translationDirectory = Path.Combine(
@@ -335,7 +344,10 @@ namespace MultilingualFileProcessingPlatform.Api.Services
 
             if (!Directory.Exists(translationDirectory))
             {
-                return PostprocessJobResult.TranslationFileNotFound;
+                return new PostprocessJobResult
+                {
+                    Result = PostprocessJobResultType.TranslationFileNotFound
+                };
             }
 
             string? translationFilePath = Directory
@@ -344,11 +356,28 @@ namespace MultilingualFileProcessingPlatform.Api.Services
 
             if (translationFilePath == null)
             {
-                return PostprocessJobResult.TranslationFileNotFound;
+                return new PostprocessJobResult
+                {
+                    Result = PostprocessJobResultType.TranslationFileNotFound
+                };
             }
 
             string reconstructionJson = File.ReadAllText(reconstructionDataPath);
             string translationJson = File.ReadAllText(translationFilePath);
+
+            TranslationValidationResult validationResult =
+                _jsonProcessingService.ValidateTranslation(
+                    reconstructionJson,
+                    translationJson);
+
+            if (!validationResult.IsValid)
+            {
+                return new PostprocessJobResult
+                {
+                    Result = PostprocessJobResultType.TranslationValidationFailed,
+                    Validation = validationResult
+                };
+            }
 
             string rebuiltJson = _jsonProcessingService.RebuildJson(
                 reconstructionJson,
@@ -369,7 +398,10 @@ namespace MultilingualFileProcessingPlatform.Api.Services
 
             File.WriteAllText(deliveryPath, rebuiltJson);
 
-            return PostprocessJobResult.Success;
+            return new PostprocessJobResult
+            {
+                Result = PostprocessJobResultType.Success
+            };
         }
     }
 }

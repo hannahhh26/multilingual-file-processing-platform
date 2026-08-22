@@ -206,18 +206,25 @@ public class JobsController : ControllerBase
     {
         PostprocessJobResult result = _jobService.PostprocessJob(id);
 
-        switch (result)
+        switch (result.Result)
         {
-            case PostprocessJobResult.JobNotFound:
+            case PostprocessJobResultType.JobNotFound:
                 return NotFound("Job not found.");
 
-            case PostprocessJobResult.ReconstructionDataNotFound:
+            case PostprocessJobResultType.ReconstructionDataNotFound:
                 return NotFound("Reconstruction data not found.");
 
-            case PostprocessJobResult.TranslationFileNotFound:
+            case PostprocessJobResultType.TranslationFileNotFound:
                 return NotFound("Translation file not found.");
 
-            case PostprocessJobResult.Success:
+            case PostprocessJobResultType.TranslationValidationFailed:
+                return BadRequest(new
+                {
+                    message = "Translation validation failed.",
+                    validation = result.Validation
+                });
+
+            case PostprocessJobResultType.Success:
                 return Ok("Post-processing completed successfully.");
 
             default:

@@ -1,10 +1,18 @@
 ﻿namespace MultilingualFileProcessingPlatform.Api.Models
 {
-    public enum PostprocessJobResult
+    public enum PostprocessJobResultType
     {
         Success,
         JobNotFound,
         ReconstructionDataNotFound,
-        TranslationFileNotFound
+        TranslationFileNotFound,
+        TranslationValidationFailed
+    }
+
+    public class PostprocessJobResult
+    {
+        public PostprocessJobResultType Result { get; set; }
+
+        public TranslationValidationResult? Validation { get; set; }
     }
 }

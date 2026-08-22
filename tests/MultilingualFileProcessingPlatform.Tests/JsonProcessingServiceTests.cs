@@ -167,5 +167,185 @@ namespace MultilingualFileProcessingPlatform.Tests
                 "Ajouter au panier",
                 rebuilt?["messages"]?["addToBasket"]?.GetValue<string>());
         }
+
+        [Fact]
+        public void ValidateTranslation_ReportsMissingSegmentIds()
+        {
+            JsonProcessingService service = new JsonProcessingService();
+
+            string reconstructionJson = """
+    {
+        "product": {
+            "name": {
+                "__segmentId": "seg-0001"
+            },
+            "description": {
+                "__segmentId": "seg-0002"
+            }
+        }
+    }
+    """;
+
+            string translationJson = """
+    {
+        "segments": [
+            {
+                "id": "seg-0001",
+                "path": "product.name",
+                "source": "Casque sans fil"
+            }
+        ]
+    }
+    """;
+
+            TranslationValidationResult result = service.ValidateTranslation(
+                reconstructionJson,
+                translationJson);
+
+            Assert.False(result.IsValid);
+            Assert.Single(result.MissingSegmentIds);
+            Assert.Equal("seg-0002", result.MissingSegmentIds[0]);
+        }
+
+        [Fact]
+        public void ValidateTranslation_ReturnsValidWhenAllSegmentsArePresent()
+        {
+            JsonProcessingService service = new JsonProcessingService();
+
+            string reconstructionJson = """
+    {
+        "product": {
+            "name": {
+                "__segmentId": "seg-0001"
+            },
+            "description": {
+                "__segmentId": "seg-0002"
+            }
+        }
+    }
+    """;
+
+            string translationJson = """
+    {
+        "segments": [
+            {
+                "id": "seg-0001",
+                "path": "product.name",
+                "source": "Casque sans fil"
+            },
+            {
+                "id": "seg-0002",
+                "path": "product.description",
+                "source": "Description traduite"
+            }
+        ]
+    }
+    """;
+
+            TranslationValidationResult result = service.ValidateTranslation(
+                reconstructionJson,
+                translationJson);
+
+            Assert.True(result.IsValid);
+            Assert.Empty(result.MissingSegmentIds);
+        }
+
+        [Fact]
+        public void ValidateTranslation_ReportsDuplicateSegmentIds()
+        {
+            JsonProcessingService service = new JsonProcessingService();
+
+            string reconstructionJson = """
+    {
+        "product": {
+            "name": {
+                "__segmentId": "seg-0001"
+            },
+            "description": {
+                "__segmentId": "seg-0002"
+            }
+        }
+    }
+    """;
+
+            string translationJson = """
+    {
+        "segments": [
+            {
+                "id": "seg-0001",
+                "path": "product.name",
+                "source": "Casque sans fil"
+            },
+            {
+                "id": "seg-0002",
+                "path": "product.description",
+                "source": "Description traduite"
+            },
+            {
+                "id": "seg-0001",
+                "path": "product.name",
+                "source": "Autre traduction"
+            }
+        ]
+    }
+    """;
+
+            TranslationValidationResult result = service.ValidateTranslation(
+                reconstructionJson,
+                translationJson);
+
+            Assert.False(result.IsValid);
+            Assert.Single(result.DuplicateSegmentIds);
+            Assert.Equal("seg-0001", result.DuplicateSegmentIds[0]);
+        }
+
+        [Fact]
+        public void ValidateTranslation_ReportsUnexpectedSegmentIds()
+        {
+            JsonProcessingService service = new JsonProcessingService();
+
+            string reconstructionJson = """
+    {
+        "product": {
+            "name": {
+                "__segmentId": "seg-0001"
+            },
+            "description": {
+                "__segmentId": "seg-0002"
+            }
+        }
+    }
+    """;
+
+            string translationJson = """
+    {
+        "segments": [
+            {
+                "id": "seg-0001",
+                "path": "product.name",
+                "source": "Casque sans fil"
+            },
+            {
+                "id": "seg-0002",
+                "path": "product.description",
+                "source": "Description traduite"
+            },
+            {
+                "id": "seg-9999",
+                "path": "extra.value",
+                "source": "Texte inattendu"
+            }
+        ]
+    }
+    """;
+
+            TranslationValidationResult result = service.ValidateTranslation(
+                reconstructionJson,
+                translationJson);
+
+            Assert.False(result.IsValid);
+            Assert.Single(result.UnexpectedSegmentIds);
+            Assert.Equal("seg-9999", result.UnexpectedSegmentIds[0]);
+        }
     }
 }

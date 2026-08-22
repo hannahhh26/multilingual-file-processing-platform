@@ -1,7 +1,6 @@
-﻿using System.Runtime.InteropServices.JavaScript;
+﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.Encodings.Web;
 using MultilingualFileProcessingPlatform.Api.Models;
 
 namespace MultilingualFileProcessingPlatform.Api.Services
@@ -60,6 +59,62 @@ namespace MultilingualFileProcessingPlatform.Api.Services
             }) ?? string.Empty;
         }
 
+        public TranslationValidationResult ValidateTranslation(
+            string reconstructionJson,
+            string translationJson)
+        {
+            JsonNode? reconstructionRoot = JsonNode.Parse(reconstructionJson);
+            JsonNode? translationRoot = JsonNode.Parse(translationJson);
+
+            HashSet<string> expectedSegmentIds = new();
+            HashSet<string> actualSegmentIds = new();
+            HashSet<string> duplicateSegmentIds = new();
+
+            CollectSegmentIds(reconstructionRoot, expectedSegmentIds);
+
+            JsonArray? segments = translationRoot?["segments"]?.AsArray();
+
+            if (segments != null)
+            {
+                foreach (JsonNode? segmentNode in segments)
+                {
+                    if (segmentNode is not JsonObject segmentObject)
+                    {
+                        continue;
+                    }
+
+                    string? id = segmentObject["id"]?.GetValue<string>();
+
+                    if (id != null)
+                    {
+                        if (!actualSegmentIds.Add(id))
+                        {
+                            duplicateSegmentIds.Add(id);
+                        }
+                    }
+                }
+            }
+
+            List<string> missingSegmentIds = expectedSegmentIds
+                .Where(id => !actualSegmentIds.Contains(id))
+                .ToList();
+
+            List<string> unexpectedSegmentIds = actualSegmentIds
+                .Where(id => !expectedSegmentIds.Contains(id))
+                .ToList();
+
+            return new TranslationValidationResult
+            {
+                IsValid = missingSegmentIds.Count == 0 &&
+                          duplicateSegmentIds.Count == 0 &&
+                          unexpectedSegmentIds.Count == 0,
+
+                MissingSegmentIds = missingSegmentIds,
+                DuplicateSegmentIds = duplicateSegmentIds.ToList(),
+                UnexpectedSegmentIds = unexpectedSegmentIds
+            };
+        }
+
         private JsonNode? ExtractNode(
             JsonNode? node,
             string path,
@@ -116,16 +171,22 @@ namespace MultilingualFileProcessingPlatform.Api.Services
             return node?.DeepClone();
         }
 
-        private JsonNode? RebuildNode(JsonNode? node, Dictionary<string, string> translations)
+        private JsonNode? RebuildNode(
+            JsonNode? node,
+            Dictionary<string, string> translations)
         {
             if (node is JsonObject jsonObject)
             {
-                if (jsonObject.TryGetPropertyValue("__segmentId", out JsonNode? segmentIdNode))
+                if (jsonObject.TryGetPropertyValue(
+                    "__segmentId",
+                    out JsonNode? segmentIdNode))
                 {
                     string? segmentId = segmentIdNode?.GetValue<string>();
 
                     if (segmentId != null &&
-                        translations.TryGetValue(segmentId, out string? translatedValue))
+                        translations.TryGetValue(
+                            segmentId,
+                            out string? translatedValue))
                     {
                         return JsonValue.Create(translatedValue);
                     }
@@ -156,6 +217,39 @@ namespace MultilingualFileProcessingPlatform.Api.Services
             }
 
             return node?.DeepClone();
+        }
+
+        private void CollectSegmentIds(
+            JsonNode? node,
+            HashSet<string> segmentIds)
+        {
+            if (node is JsonObject jsonObject)
+            {
+                if (jsonObject.TryGetPropertyValue(
+                    "__segmentId",
+                    out JsonNode? segmentIdNode))
+                {
+                    string? segmentId = segmentIdNode?.GetValue<string>();
+
+                    if (segmentId != null)
+                    {
+                        segmentIds.Add(segmentId);
+                        return;
+                    }
+                }
+
+                foreach (KeyValuePair<string, JsonNode?> property in jsonObject)
+                {
+                    CollectSegmentIds(property.Value, segmentIds);
+                }
+            }
+            else if (node is JsonArray jsonArray)
+            {
+                foreach (JsonNode? item in jsonArray)
+                {
+                    CollectSegmentIds(item, segmentIds);
+                }
+            }
         }
     }
 }
