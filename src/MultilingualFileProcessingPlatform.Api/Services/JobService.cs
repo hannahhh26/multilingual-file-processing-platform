@@ -299,5 +299,77 @@ namespace MultilingualFileProcessingPlatform.Api.Services
                 };
             }
         }
+
+        public PostprocessJobResult PostprocessJob(Guid id)
+        {
+            Job? job = _context.Jobs.FirstOrDefault(job => job.Id == id);
+
+            if (job == null)
+            {
+                return PostprocessJobResult.JobNotFound;
+            }
+
+            string reconstructionDataDirectory = Path.Combine(
+                "Uploads",
+                id.ToString(),
+                "ReconstructionData");
+
+            if (!Directory.Exists(reconstructionDataDirectory))
+            {
+                return PostprocessJobResult.ReconstructionDataNotFound;
+            }
+
+            string? reconstructionDataPath = Directory
+                .GetFiles(reconstructionDataDirectory, "*.json")
+                .FirstOrDefault();
+
+            if (reconstructionDataPath == null)
+            {
+                return PostprocessJobResult.ReconstructionDataNotFound;
+            }
+
+            string translationDirectory = Path.Combine(
+                "Uploads",
+                id.ToString(),
+                "Translation");
+
+            if (!Directory.Exists(translationDirectory))
+            {
+                return PostprocessJobResult.TranslationFileNotFound;
+            }
+
+            string? translationFilePath = Directory
+                .GetFiles(translationDirectory, "*.json")
+                .FirstOrDefault();
+
+            if (translationFilePath == null)
+            {
+                return PostprocessJobResult.TranslationFileNotFound;
+            }
+
+            string reconstructionJson = File.ReadAllText(reconstructionDataPath);
+            string translationJson = File.ReadAllText(translationFilePath);
+
+            string rebuiltJson = _jsonProcessingService.RebuildJson(
+                reconstructionJson,
+                translationJson);
+
+            string deliveryDirectory = Path.Combine(
+                "Uploads",
+                id.ToString(),
+                "Delivery");
+
+            Directory.CreateDirectory(deliveryDirectory);
+
+            string fileName = Path.GetFileName(translationFilePath);
+
+            string deliveryPath = Path.Combine(
+                deliveryDirectory,
+                fileName);
+
+            File.WriteAllText(deliveryPath, rebuiltJson);
+
+            return PostprocessJobResult.Success;
+        }
     }
 }

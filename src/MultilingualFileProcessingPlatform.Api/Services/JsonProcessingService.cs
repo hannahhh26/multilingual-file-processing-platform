@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Encodings.Web;
 using MultilingualFileProcessingPlatform.Api.Models;
 
 namespace MultilingualFileProcessingPlatform.Api.Services
@@ -20,6 +21,43 @@ namespace MultilingualFileProcessingPlatform.Api.Services
                 Segments = segments,
                 ReconstructionData = reconstructionData
             };
+        }
+
+        public string RebuildJson(string reconstructionJson, string translationJson)
+        {
+            JsonNode? reconstructionRoot = JsonNode.Parse(reconstructionJson);
+            JsonNode? translationRoot = JsonNode.Parse(translationJson);
+
+            Dictionary<string, string> translations = new();
+
+            JsonArray? segments = translationRoot?["segments"]?.AsArray();
+
+            if (segments != null)
+            {
+                foreach (JsonNode? segmentNode in segments)
+                {
+                    if (segmentNode is not JsonObject segmentObject)
+                    {
+                        continue;
+                    }
+
+                    string? id = segmentObject["id"]?.GetValue<string>();
+                    string? source = segmentObject["source"]?.GetValue<string>();
+
+                    if (id != null && source != null)
+                    {
+                        translations[id] = source;
+                    }
+                }
+            }
+
+            JsonNode? rebuilt = RebuildNode(reconstructionRoot, translations);
+
+            return rebuilt?.ToJsonString(new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            }) ?? string.Empty;
         }
 
         private JsonNode? ExtractNode(
@@ -73,6 +111,48 @@ namespace MultilingualFileProcessingPlatform.Api.Services
                 {
                     ["__segmentId"] = segmentId
                 };
+            }
+
+            return node?.DeepClone();
+        }
+
+        private JsonNode? RebuildNode(JsonNode? node, Dictionary<string, string> translations)
+        {
+            if (node is JsonObject jsonObject)
+            {
+                if (jsonObject.TryGetPropertyValue("__segmentId", out JsonNode? segmentIdNode))
+                {
+                    string? segmentId = segmentIdNode?.GetValue<string>();
+
+                    if (segmentId != null &&
+                        translations.TryGetValue(segmentId, out string? translatedValue))
+                    {
+                        return JsonValue.Create(translatedValue);
+                    }
+                }
+
+                JsonObject rebuiltObject = new();
+
+                foreach (KeyValuePair<string, JsonNode?> property in jsonObject)
+                {
+                    rebuiltObject[property.Key] =
+                        RebuildNode(property.Value, translations);
+                }
+
+                return rebuiltObject;
+            }
+
+            if (node is JsonArray jsonArray)
+            {
+                JsonArray rebuiltArray = new();
+
+                foreach (JsonNode? item in jsonArray)
+                {
+                    rebuiltArray.Add(
+                        RebuildNode(item, translations));
+                }
+
+                return rebuiltArray;
             }
 
             return node?.DeepClone();

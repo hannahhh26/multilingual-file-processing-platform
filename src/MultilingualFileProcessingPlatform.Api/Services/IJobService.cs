@@ -21,5 +21,7 @@ namespace MultilingualFileProcessingPlatform.Api.Services
         GetPreparedSourceResult GetPreparedSource(Guid id);
 
         SaveTranslationFileResult SaveTranslationFile(Guid id, IFormFile file);
+
+        PostprocessJobResult PostprocessJob(Guid id);
     }
 }

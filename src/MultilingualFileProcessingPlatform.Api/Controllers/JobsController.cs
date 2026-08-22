@@ -197,4 +197,31 @@ public class JobsController : ControllerBase
                 return StatusCode(500);
         }
     }
+
+    /// <summary>
+    /// Rebuilds the translated JSON into the original structure and creates the delivery file.
+    /// </summary>
+    [HttpPost("{id}/postprocess")]
+    public IActionResult PostprocessJob(Guid id)
+    {
+        PostprocessJobResult result = _jobService.PostprocessJob(id);
+
+        switch (result)
+        {
+            case PostprocessJobResult.JobNotFound:
+                return NotFound("Job not found.");
+
+            case PostprocessJobResult.ReconstructionDataNotFound:
+                return NotFound("Reconstruction data not found.");
+
+            case PostprocessJobResult.TranslationFileNotFound:
+                return NotFound("Translation file not found.");
+
+            case PostprocessJobResult.Success:
+                return Ok("Post-processing completed successfully.");
+
+            default:
+                return StatusCode(500);
+        }
+    }
 }
