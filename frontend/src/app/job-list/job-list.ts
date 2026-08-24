@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
+import { JobService } from '../services/job.service';
+import { Job } from '../models/job';
 
 @Component({
   imports: [],
@@ -6,9 +8,14 @@ import { Component } from '@angular/core';
   styleUrl: './job-list.css',
   templateUrl: './job-list.html',
 })
-export class JobList {
-  jobs = [
-    { id: 1, name: 'Example Job 1' },
-    { id: 2, name: 'Example Job 2' },
-  ];
+export class JobList implements OnInit {
+  jobs = signal<Job[]>([]);
+
+  constructor(private jobService: JobService) {}
+
+  ngOnInit(): void {
+    this.jobService.getJobs().subscribe((jobs) => {
+      this.jobs.set(jobs);
+    });
+  }
 }

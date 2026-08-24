@@ -16,6 +16,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<JsonProcessingService>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -28,6 +37,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAngularFrontend");
 
 app.MapGet("/", () => "Multilingual File Processing Platform API");
 
