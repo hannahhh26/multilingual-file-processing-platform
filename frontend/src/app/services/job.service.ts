@@ -46,4 +46,37 @@ downloadPreparedSource(jobId: string) {
   );
 }
 
+uploadTranslation(jobId: string, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return this.http.post(
+    `${this.apiUrl}/${jobId}/translation`,
+    formData,
+    {
+      responseType: 'text'
+    }
+  );
+}
+
+postprocessJob(jobId: string) {
+  return this.http.post(
+    `${this.apiUrl}/${jobId}/postprocess`,
+    null,
+    {
+      responseType: 'text'
+    }
+  );
+}
+
+downloadDelivery(jobId: string) {
+  return this.http.get(
+    `${this.apiUrl}/${jobId}/delivery`,
+    {
+      responseType: 'blob',
+      observe: 'response'
+    }
+  );
+}
+
 }

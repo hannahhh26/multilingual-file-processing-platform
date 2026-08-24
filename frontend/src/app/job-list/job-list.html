@@ -40,3 +40,25 @@
 <button (click)="downloadPreparedSource()">
   Download prepared source
 </button>
+
+<input
+  #translationFileInput
+  type="file"
+  accept=".json"
+  (change)="onTranslationFileSelected($event)"
+/>
+
+@if (selectedTranslationFile()) {
+  <p>Selected translation: {{ selectedTranslationFile()!.name }}</p>
+}
+
+<button
+  (click)="uploadTranslation()"
+  [disabled]="!selectedTranslationFile()"
+>
+  Upload translation
+</button>
+
+<button (click)="downloadDelivery()">
+  Download delivery
+</button>

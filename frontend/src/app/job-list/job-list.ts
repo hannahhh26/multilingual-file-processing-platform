@@ -14,10 +14,14 @@ export class JobList implements OnInit {
   @ViewChild('sourceFileInput')
   sourceFileInput!: ElementRef<HTMLInputElement>;
 
+  @ViewChild('translationFileInput')
+ translationFileInput!: ElementRef<HTMLInputElement>;
+
   jobs = signal<Job[]>([]);
   newJobName = signal('');
   selectedJob = signal<Job | null>(null);
   selectedSourceFile = signal<File | null>(null);
+  selectedTranslationFile = signal<File | null>(null);
 
   constructor(private jobService: JobService) {}
 
@@ -88,6 +92,70 @@ downloadPreparedSource(): void {
     const contentDisposition = response.headers.get('Content-Disposition');
 
     let fileName = 'prepared-source.json';
+
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(/filename=([^;]+)/);
+
+      if (fileNameMatch) {
+        fileName = fileNameMatch[1];
+      }
+    }
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+
+    window.URL.revokeObjectURL(url);
+  });
+}
+
+onTranslationFileSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+  this.selectedTranslationFile.set(file);
+}
+
+uploadTranslation(): void {
+  const job = this.selectedJob();
+  const file = this.selectedTranslationFile();
+
+  if (!job || !file) {
+    return;
+  }
+
+this.jobService.uploadTranslation(job.id, file).subscribe(() => {
+  this.jobService.postprocessJob(job.id).subscribe(() => {
+    this.selectedTranslationFile.set(null);
+    this.translationFileInput.nativeElement.value = '';
+  });
+});
+}
+
+downloadDelivery(): void {
+  const job = this.selectedJob();
+
+  if (!job) {
+    return;
+  }
+
+  this.jobService.downloadDelivery(job.id).subscribe((response) => {
+    const blob = response.body;
+
+    if (!blob) {
+      return;
+    }
+
+    const contentDisposition = response.headers.get('Content-Disposition');
+
+    let fileName = 'delivery.json';
 
     if (contentDisposition) {
       const fileNameMatch = contentDisposition.match(/filename=([^;]+)/);
