@@ -172,7 +172,8 @@ namespace MultilingualFileProcessingPlatform.Api.Services
                 },
                 new JsonSerializerOptions
                 {
-                    WriteIndented = true
+                    WriteIndented = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
             File.WriteAllText(preparedSourcePath, preparedJson);
