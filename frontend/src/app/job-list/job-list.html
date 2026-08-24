@@ -1,5 +1,42 @@
 <h2>Jobs</h2>
 
+<input
+  type="text"
+  [ngModel]="newJobName()"
+  (ngModelChange)="newJobName.set($event)"
+  placeholder="Job name"
+/>
+
+<button (click)="createJob()">Create job</button>
+
 @for (job of jobs(); track job.id) {
-  <p>{{ job.name }}</p>
+  <p (click)="selectJob(job)">{{ job.name }}</p>
 }
+
+@if (selectedJob()) {
+  <h3>Selected job</h3>
+  <p>Name: {{ selectedJob()!.name }}</p>
+  <p>Status: {{ selectedJob()!.status }}</p>
+}
+
+<input
+  #sourceFileInput
+  type="file"
+  accept=".json"
+  (change)="onSourceFileSelected($event)"
+/>
+
+@if (selectedSourceFile()) {
+  <p>Selected file: {{ selectedSourceFile()!.name }}</p>
+}
+
+<button
+  (click)="uploadSourceFile()"
+  [disabled]="!selectedSourceFile()"
+>
+  Upload source
+</button>
+
+<button (click)="downloadPreparedSource()">
+  Download prepared source
+</button>
