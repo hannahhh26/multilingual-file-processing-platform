@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { JobService } from '../services/job.service';
-import { Job } from '../models/job';
+import { Job, TranslationValidation } from '../models/job';
 
 @Component({
   imports: [FormsModule],
@@ -23,6 +23,8 @@ export class JobList implements OnInit {
   selectedJob = signal<Job | null>(null);
   selectedSourceFile = signal<File | null>(null);
   selectedTranslationFile = signal<File | null>(null);
+  errorMessage = signal<string | null>(null);
+  validationErrors = signal<TranslationValidation | null>(null);
 
   constructor(private jobService: JobService) {}
 
@@ -48,6 +50,8 @@ export class JobList implements OnInit {
 selectJob(job: Job): void {
   this.selectedJob.set(job);
   this.updatedJobName.set(job.name);
+  this.errorMessage.set(null);
+  this.validationErrors.set(null);
 }
 
 updateJob(): void {
@@ -105,12 +109,28 @@ uploadSourceFile(): void {
     return;
   }
 
-this.jobService.uploadSourceFile(job.id, file).subscribe(() => {
-  this.jobService.preprocessJob(job.id).subscribe(() => {
-    this.selectedSourceFile.set(null);
-    this.sourceFileInput.nativeElement.value = '';
+  this.errorMessage.set(null);
+
+  this.jobService.uploadSourceFile(job.id, file).subscribe({
+    next: () => {
+      this.jobService.preprocessJob(job.id).subscribe({
+        next: () => {
+          this.selectedSourceFile.set(null);
+          this.sourceFileInput.nativeElement.value = '';
+        },
+        error: (error) => {
+          this.errorMessage.set(
+            error.error || 'Failed to preprocess source file.'
+          );
+        }
+      });
+    },
+    error: (error) => {
+      this.errorMessage.set(
+        error.error || 'Failed to upload source file.'
+      );
+    }
   });
-});
 }
 
 downloadPreparedSource(): void {
@@ -120,7 +140,10 @@ downloadPreparedSource(): void {
     return;
   }
 
-  this.jobService.downloadPreparedSource(job.id).subscribe((response) => {
+  this.errorMessage.set(null);
+
+  this.jobService.downloadPreparedSource(job.id).subscribe({
+  next: (response) => {
     const blob = response.body;
 
     if (!blob) {
@@ -147,7 +170,12 @@ downloadPreparedSource(): void {
     link.click();
 
     window.URL.revokeObjectURL(url);
-  });
+    },
+  error: (error) => {
+    this.errorMessage.set('Failed to download prepared source.'
+    );
+  }
+});
 }
 
 onTranslationFileSelected(event: Event): void {
@@ -169,13 +197,46 @@ uploadTranslation(): void {
     return;
   }
 
-this.jobService.uploadTranslation(job.id, file).subscribe(() => {
-  this.jobService.postprocessJob(job.id).subscribe(() => {
-    this.selectedTranslationFile.set(null);
-    this.translationFileInput.nativeElement.value = '';
+  this.errorMessage.set(null);
+  this.validationErrors.set(null);
+
+  this.jobService.uploadTranslation(job.id, file).subscribe({
+    next: () => {
+      this.jobService.postprocessJob(job.id).subscribe({
+        next: () => {
+          this.selectedTranslationFile.set(null);
+          this.translationFileInput.nativeElement.value = '';
+        },
+        error: (error) => {
+          try {
+            const errorResponse = JSON.parse(error.error);
+
+            this.errorMessage.set(
+              errorResponse.message || 'Failed to post-process translation.'
+            );
+
+            this.validationErrors.set(
+              errorResponse.validation || null
+            );
+          } catch {
+            this.errorMessage.set(
+              error.error || 'Failed to post-process translation.'
+            );
+
+            this.validationErrors.set(null);
+          }
+        }
+      });
+    },
+    error: (error) => {
+      this.errorMessage.set(
+        error.error || 'Failed to upload translation.'
+      );
+    }
   });
-});
 }
+
+
 
 downloadDelivery(): void {
   const job = this.selectedJob();
@@ -184,33 +245,39 @@ downloadDelivery(): void {
     return;
   }
 
-  this.jobService.downloadDelivery(job.id).subscribe((response) => {
-    const blob = response.body;
+  this.errorMessage.set(null);
 
-    if (!blob) {
-      return;
-    }
+  this.jobService.downloadDelivery(job.id).subscribe({
+    next: (response) => {
+      const blob = response.body;
 
-    const contentDisposition = response.headers.get('Content-Disposition');
-
-    let fileName = 'delivery.json';
-
-    if (contentDisposition) {
-      const fileNameMatch = contentDisposition.match(/filename=([^;]+)/);
-
-      if (fileNameMatch) {
-        fileName = fileNameMatch[1];
+      if (!blob) {
+        return;
       }
+
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let fileName = 'delivery.json';
+
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename=([^;]+)/);
+
+        if (fileNameMatch) {
+          fileName = fileNameMatch[1];
+        }
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = fileName;
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+    },
+    error: () => {
+      this.errorMessage.set('Delivery file is not available.');
     }
-
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-
-    window.URL.revokeObjectURL(url);
   });
 }
 

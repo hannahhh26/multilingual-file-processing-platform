@@ -65,8 +65,41 @@
   (change)="onTranslationFileSelected($event)"
 />
 
+@if (errorMessage()) {
+  <p>{{ errorMessage() }}</p>
+}
+
 @if (selectedTranslationFile()) {
   <p>Selected translation: {{ selectedTranslationFile()!.name }}</p>
+}
+
+@if (validationErrors()) {
+  @if (validationErrors()!.missingSegmentIds.length > 0) {
+    <p>Missing segments:</p>
+    <ul>
+      @for (segmentId of validationErrors()!.missingSegmentIds; track segmentId) {
+        <li>{{ segmentId }}</li>
+      }
+    </ul>
+  }
+
+  @if (validationErrors()!.duplicateSegmentIds.length > 0) {
+    <p>Duplicate segments:</p>
+    <ul>
+      @for (segmentId of validationErrors()!.duplicateSegmentIds; track segmentId) {
+        <li>{{ segmentId }}</li>
+      }
+    </ul>
+  }
+
+  @if (validationErrors()!.unexpectedSegmentIds.length > 0) {
+    <p>Unexpected segments:</p>
+    <ul>
+      @for (segmentId of validationErrors()!.unexpectedSegmentIds; track segmentId) {
+        <li>{{ segmentId }}</li>
+      }
+    </ul>
+  }
 }
 
 <button
