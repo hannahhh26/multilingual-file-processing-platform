@@ -19,6 +19,7 @@ export class JobList implements OnInit {
 
   jobs = signal<Job[]>([]);
   newJobName = signal('');
+  updatedJobName = signal('');
   selectedJob = signal<Job | null>(null);
   selectedSourceFile = signal<File | null>(null);
   selectedTranslationFile = signal<File | null>(null);
@@ -46,6 +47,43 @@ export class JobList implements OnInit {
 
 selectJob(job: Job): void {
   this.selectedJob.set(job);
+  this.updatedJobName.set(job.name);
+}
+
+updateJob(): void {
+  const job = this.selectedJob();
+  const name = this.updatedJobName();
+
+  if (!job || !name) {
+    return;
+  }
+
+  this.jobService.updateJob(job.id, name).subscribe((updatedJob) => {
+    this.selectedJob.set(updatedJob);
+
+    this.jobs.update((jobs) =>
+      jobs.map((job) =>
+        job.id === updatedJob.id ? updatedJob : job
+      )
+    );
+  });
+}
+
+deleteJob(): void {
+  const job = this.selectedJob();
+
+  if (!job) {
+    return;
+  }
+
+  this.jobService.deleteJob(job.id).subscribe(() => {
+    this.jobs.update((jobs) =>
+      jobs.filter((existingJob) => existingJob.id !== job.id)
+    );
+
+    this.selectedJob.set(null);
+    this.updatedJobName.set('');
+  });
 }
 
 onSourceFileSelected(event: Event): void {

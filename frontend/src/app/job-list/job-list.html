@@ -26,6 +26,23 @@
   (change)="onSourceFileSelected($event)"
 />
 
+<input
+  type="text"
+  [ngModel]="updatedJobName()"
+  (ngModelChange)="updatedJobName.set($event)"
+/>
+
+<button
+  (click)="updateJob()"
+  [disabled]="!updatedJobName()"
+>
+  Rename job
+</button>
+
+<button (click)="deleteJob()">
+  Delete job
+</button>
+
 @if (selectedSourceFile()) {
   <p>Selected file: {{ selectedSourceFile()!.name }}</p>
 }

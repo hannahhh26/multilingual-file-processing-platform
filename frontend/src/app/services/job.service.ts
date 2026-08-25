@@ -19,6 +19,19 @@ export class JobService {
   return this.http.post<Job>(this.apiUrl, { name });
 }
 
+updateJob(jobId: string, name: string) {
+  return this.http.put<Job>(
+    `${this.apiUrl}/${jobId}`,
+    { name }
+  );
+}
+
+deleteJob(jobId: string) {
+  return this.http.delete(
+    `${this.apiUrl}/${jobId}`
+  );
+}
+
 uploadSourceFile(jobId: string, file: File) {
   const formData = new FormData();
   formData.append('file', file);
