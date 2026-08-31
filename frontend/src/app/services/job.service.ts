@@ -7,7 +7,7 @@ import { Job } from '../models/job';
   providedIn: 'root'
 })
 export class JobService {
-  private readonly apiUrl = 'https://localhost:7271/api/jobs';
+  private readonly apiUrl = 'http://localhost:8080/api/jobs';
 
   constructor(private http: HttpClient) {}
 
