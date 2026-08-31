@@ -1,114 +1,150 @@
-<h2>Jobs</h2>
+<div class="job-layout">
+  <section class="job-sidebar">
+    <h2>Jobs</h2>
 
-<input
-  type="text"
-  [ngModel]="newJobName()"
-  (ngModelChange)="newJobName.set($event)"
-  placeholder="Job name"
-/>
+    <div class="create-job">
+      <input
+        type="text"
+        [ngModel]="newJobName()"
+        (ngModelChange)="newJobName.set($event)"
+        placeholder="Job name"
+      />
 
-<button (click)="createJob()">Create job</button>
+      <button (click)="createJob()">Create job</button>
+    </div>
 
-@for (job of jobs(); track job.id) {
-  <p (click)="selectJob(job)">{{ job.name }}</p>
-}
-
-@if (selectedJob()) {
-  <h3>Selected job</h3>
-  <p>Name: {{ selectedJob()!.name }}</p>
-  <p>Status: {{ selectedJob()!.status }}</p>
-}
-
-<input
-  #sourceFileInput
-  type="file"
-  accept=".json"
-  (change)="onSourceFileSelected($event)"
-/>
-
-<input
-  type="text"
-  [ngModel]="updatedJobName()"
-  (ngModelChange)="updatedJobName.set($event)"
-/>
-
-<button
-  (click)="updateJob()"
-  [disabled]="!updatedJobName()"
->
-  Rename job
-</button>
-
-<button (click)="deleteJob()">
-  Delete job
-</button>
-
-@if (selectedSourceFile()) {
-  <p>Selected file: {{ selectedSourceFile()!.name }}</p>
-}
-
-<button
-  (click)="uploadSourceFile()"
-  [disabled]="!selectedSourceFile()"
->
-  Upload source
-</button>
-
-<button (click)="downloadPreparedSource()">
-  Download prepared source
-</button>
-
-<input
-  #translationFileInput
-  type="file"
-  accept=".json"
-  (change)="onTranslationFileSelected($event)"
-/>
-
-@if (errorMessage()) {
-  <p>{{ errorMessage() }}</p>
-}
-
-@if (selectedTranslationFile()) {
-  <p>Selected translation: {{ selectedTranslationFile()!.name }}</p>
-}
-
-@if (validationErrors()) {
-  @if (validationErrors()!.missingSegmentIds.length > 0) {
-    <p>Missing segments:</p>
-    <ul>
-      @for (segmentId of validationErrors()!.missingSegmentIds; track segmentId) {
-        <li>{{ segmentId }}</li>
+    <div class="job-list">
+      @for (job of jobs(); track job.id) {
+        <p
+          class="job-item"
+          [class.selected]="selectedJob()?.id === job.id"
+          (click)="selectJob(job)"
+        >
+          {{ job.name }}
+        </p>
       }
-    </ul>
-  }
+    </div>
+  </section>
 
-  @if (validationErrors()!.duplicateSegmentIds.length > 0) {
-    <p>Duplicate segments:</p>
-    <ul>
-      @for (segmentId of validationErrors()!.duplicateSegmentIds; track segmentId) {
-        <li>{{ segmentId }}</li>
-      }
-    </ul>
-  }
+  <section class="job-workspace">
+    @if (selectedJob()) {
+      <div class="job-header">
+        <h2>{{ selectedJob()!.name }}</h2>
+      </div>
 
-  @if (validationErrors()!.unexpectedSegmentIds.length > 0) {
-    <p>Unexpected segments:</p>
-    <ul>
-      @for (segmentId of validationErrors()!.unexpectedSegmentIds; track segmentId) {
-        <li>{{ segmentId }}</li>
-      }
-    </ul>
-  }
-}
+      <div class="workflow-section source-section">
+        <h3>Source file</h3>
 
-<button
-  (click)="uploadTranslation()"
-  [disabled]="!selectedTranslationFile()"
->
-  Upload translation
-</button>
+        <div class="workflow-actions">
+          <input
+            #sourceFileInput
+            type="file"
+            accept=".json"
+            (change)="onSourceFileSelected($event)"
+          />
 
-<button (click)="downloadDelivery()">
-  Download delivery
-</button>
+          <button (click)="uploadSourceFile()" [disabled]="!selectedSourceFile()">
+            Upload source
+          </button>
+
+          <button class="source-action" (click)="downloadPreparedSource()">
+            <i data-lucide="download"></i>
+            Download prepared source
+          </button>
+        </div>
+
+        @if (selectedSourceFile()) {
+          <p>Selected file: {{ selectedSourceFile()!.name }}</p>
+        }
+      </div>
+
+      <div class="workflow-section translation-section">
+        <h3>Translation</h3>
+
+        <div class="workflow-actions">
+          <input
+            #translationFileInput
+            type="file"
+            accept=".json"
+            (change)="onTranslationFileSelected($event)"
+          />
+
+          <button (click)="uploadTranslation()" [disabled]="!selectedTranslationFile()">
+            Upload translation
+          </button>
+
+          <button class="translation-action" (click)="downloadDelivery()">
+            <i data-lucide="download"></i>
+            Download delivery
+          </button>
+        </div>
+
+        @if (selectedTranslationFile()) {
+          <p>Selected translation: {{ selectedTranslationFile()!.name }}</p>
+        }
+
+        @if (errorMessage()) {
+          <p class="error-message">{{ errorMessage() }}</p>
+        }
+
+        @if (validationErrors()) {
+          <div class="validation-errors">
+            @if (validationErrors()!.missingSegmentIds.length > 0) {
+              <p>Missing segments:</p>
+              <ul>
+                @for (segmentId of validationErrors()!.missingSegmentIds; track segmentId) {
+                  <li>{{ segmentId }}</li>
+                }
+              </ul>
+            }
+
+            @if (validationErrors()!.duplicateSegmentIds.length > 0) {
+              <p>Duplicate segments:</p>
+              <ul>
+                @for (segmentId of validationErrors()!.duplicateSegmentIds; track segmentId) {
+                  <li>{{ segmentId }}</li>
+                }
+              </ul>
+            }
+
+            @if (validationErrors()!.unexpectedSegmentIds.length > 0) {
+              <p>Unexpected segments:</p>
+              <ul>
+                @for (segmentId of validationErrors()!.unexpectedSegmentIds; track segmentId) {
+                  <li>{{ segmentId }}</li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="workflow-section settings-section">
+        <h3>Job settings</h3>
+
+        <div class="workflow-actions">
+          <input
+            type="text"
+            [ngModel]="updatedJobName()"
+            (ngModelChange)="updatedJobName.set($event)"
+          />
+
+          <button class="settings-action" (click)="updateJob()" [disabled]="!updatedJobName()">
+            <i data-lucide="pencil"></i>
+            Rename job
+          </button>
+
+          <button class="danger-button" (click)="deleteJob()">
+            <i data-lucide="trash-2"></i>
+            Delete job
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="empty-workspace">
+        <h2>Select a job</h2>
+        <p>Choose a job from the list to start processing files.</p>
+      </div>
+    }
+  </section>
+</div>

@@ -1,0 +1,293 @@
+.job-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.job-sidebar {
+  border-right: 1px solid var(--color-border);
+  padding-right: 1.5rem;
+  min-height: 500px;
+}
+
+.job-sidebar h2,
+.job-header h2 {
+  color: var(--color-navy);
+}
+
+.job-sidebar h2 {
+  margin: 0 0 1rem;
+}
+
+.create-job {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.create-job input {
+  flex: 1;
+  min-width: 0;
+}
+
+.create-job button {
+  background-color: var(--color-blue);
+  border-color: var(--color-blue);
+  color: #fff;
+  font-weight: 600;
+}
+
+.create-job button:hover:not(:disabled) {
+  background-color: #245ed0;
+  border-color: #245ed0;
+}
+
+.job-list {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.job-item {
+  padding: 0.75rem 1rem;
+  margin: 0;
+  border-left: 4px solid transparent;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.job-item:last-child {
+  border-bottom: none;
+}
+
+.job-item:hover {
+  background-color: #f7faff;
+}
+
+.job-item.selected {
+  background-color: var(--color-blue-soft);
+  border-left-color: var(--color-blue);
+  font-weight: 600;
+}
+
+.job-workspace {
+  min-width: 0;
+  max-width: 900px;
+}
+
+.job-header {
+  margin-bottom: 1.25rem;
+}
+
+.job-header h2 {
+  margin: 0;
+}
+
+.empty-workspace {
+  padding: 2rem;
+  text-align: center;
+  color: #666;
+}
+
+.empty-workspace h2 {
+  margin-bottom: 0.5rem;
+}
+
+.workflow-section {
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.workflow-section h3 {
+  margin: 0 0 1.25rem;
+  font-size: 1.1rem;
+}
+
+.workflow-section p {
+  margin-bottom: 0;
+}
+
+.workflow-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.workflow-actions input[type='file'] {
+  width: 320px;
+  max-width: 100%;
+}
+
+.workflow-actions input[type='text'] {
+  width: 300px;
+  max-width: 100%;
+}
+
+.workflow-actions button {
+  white-space: nowrap;
+}
+
+.source-section {
+  border-top: 4px solid var(--color-blue);
+  background-color: #f8fbff;
+}
+
+.source-section h3 {
+  color: var(--color-blue);
+}
+
+.translation-section {
+  border-top: 4px solid #3a9d6f;
+  background-color: #f7fcf9;
+}
+
+.translation-section h3 {
+  color: #2f7d59;
+}
+
+.settings-section {
+  border-top: 4px solid #8064c9;
+  background-color: #faf8ff;
+}
+
+.settings-section h3 {
+  color: #6d52b5;
+}
+
+input {
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background-color: #f7faff;
+}
+
+button:disabled {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.source-action,
+.translation-action,
+.settings-action,
+.danger-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.source-action svg,
+.translation-action svg,
+.settings-action svg,
+.danger-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.source-action {
+  background-color: #fff;
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+  font-weight: 600;
+}
+
+.source-action:hover:not(:disabled) {
+  background-color: var(--color-blue-soft);
+}
+
+.translation-action {
+  background-color: #fff;
+  border-color: #3a9d6f;
+  color: #2f7d59;
+  font-weight: 600;
+}
+
+.translation-action:hover:not(:disabled) {
+  background-color: #eef9f3;
+}
+
+.settings-action {
+  background-color: #fff;
+  border-color: #8064c9;
+  color: #6d52b5;
+  font-weight: 600;
+}
+
+.settings-action:hover:not(:disabled) {
+  background-color: #f3effc;
+}
+
+.danger-button {
+  border-color: #c62828;
+  color: #c62828;
+}
+
+.danger-button:hover:not(:disabled) {
+  background-color: #fdecec;
+}
+
+.error-message {
+  padding: 0.75rem;
+  margin-top: 1rem;
+  border: 1px solid #c62828;
+  border-radius: 4px;
+  background-color: #fdecec;
+  color: #8e1b1b;
+}
+
+.validation-errors {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-left: 3px solid #c62828;
+  background-color: #fff7f7;
+}
+
+.validation-errors p {
+  margin: 0.5rem 0 0.25rem;
+  font-weight: 600;
+}
+
+.validation-errors p:first-child {
+  margin-top: 0;
+}
+
+.validation-errors ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+@media (max-width: 800px) {
+  .job-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .job-sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    padding-right: 0;
+    padding-bottom: 1.5rem;
+    min-height: auto;
+  }
+
+  .workflow-actions {
+    flex-wrap: wrap;
+  }
+}

@@ -1,0 +1,30 @@
+:host {
+  --color-navy: #17324d;
+  --color-blue: #2f6fed;
+  --color-blue-soft: #eef5ff;
+  --color-border: #d9e4ef;
+  --color-text: #24364b;
+
+  display: block;
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-text);
+  background-color: #fff;
+}
+
+.app-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--color-blue-soft);
+}
+
+.app-header h1 {
+  margin: 0;
+  color: var(--color-navy);
+}
+
+.app-header p {
+  margin: 0.5rem 0 0;
+  color: #666;
+}

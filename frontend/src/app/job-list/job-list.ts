@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, signal, ViewChild, AfterViewChecked } from '@angular/core';
+import { createIcons, Download, Pencil, Trash2 } from 'lucide';
 import { FormsModule } from '@angular/forms';
 import { JobService } from '../services/job.service';
 import { Job, TranslationValidation } from '../models/job';
@@ -9,7 +10,7 @@ import { Job, TranslationValidation } from '../models/job';
   styleUrl: './job-list.css',
   templateUrl: './job-list.html',
 })
-export class JobList implements OnInit {
+export class JobList implements OnInit, AfterViewChecked {
 
   @ViewChild('sourceFileInput')
   sourceFileInput!: ElementRef<HTMLInputElement>;
@@ -28,11 +29,21 @@ export class JobList implements OnInit {
 
   constructor(private jobService: JobService) {}
 
-  ngOnInit(): void {
-    this.jobService.getJobs().subscribe((jobs) => {
-      this.jobs.set(jobs);
-    });
-  }
+ngOnInit(): void {
+  this.jobService.getJobs().subscribe((jobs) => {
+    this.jobs.set(jobs);
+  });
+}
+
+ngAfterViewChecked(): void {
+  createIcons({
+    icons: {
+      Download,
+      Pencil,
+      Trash2
+    }
+  });
+}
 
   createJob(): void {
   const name = this.newJobName();
