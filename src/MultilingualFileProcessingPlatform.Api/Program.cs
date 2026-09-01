@@ -20,10 +20,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .WithExposedHeaders("Content-Disposition");
+        policy.WithOrigins(
+            "http://localhost:4200",
+            "https://blue-pebble-06ec9e30f.3.azurestaticapps.net"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .WithExposedHeaders("Content-Disposition");
     });
 });
 
